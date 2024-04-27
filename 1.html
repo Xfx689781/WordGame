@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Guessing Game</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  #container {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    text-align: center;
+  }
+  
+  #word {
+    font-size: 24px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  #letters {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .letter {
+    font-size: 20px;
+    margin: 5px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    transition: background-color 0.3s ease;
+  }
+  
+  .letter:hover {
+    background-color: #45a049;
+  }
+  
+  .letter.disabled {
+    background-color: #ddd;
+    cursor: default;
+  }
+</style>
+</head>
+<body>
+<div id="container">
+  <h1>Word Guessing Game</h1>
+  <div id="word"></div>
+  <div id="letters"></div>
+  <p id="timer">Time left: <span id="time"></span></p>
+  <p id="score">Score: <span id="scoreValue">0</span></p>
+  <p id="level">Level: <span id="levelValue">1</span></p>
+</div>
+
+<script>
+  const words = ["JAVASCRIPT", "HTML", "CSS", "PYTHON", "JAVA", "PHP"];
+  let word, guessedLetters, wordDisplay, level, timeLimit, timer, score;
+  
+  function initializeGame() {
+    word = words[Math.floor(Math.random() * words.length)];
+    guessedLetters = [];
+    wordDisplay = word.split('').map(letter => '_').join(' ');
+    document.getElementById('word').innerText = wordDisplay;
+    level = 1;
+    timeLimit = 30;
+    score = 0;
+    updateScore();
+    updateLevel();
+    updateTimer();
+    startTimer();
+    generateAlphabetButtons();
+  }
+  
+  function updateTimer() {
+    document.getElementById('time').innerText = timeLimit;
+  }
+  
+  function startTimer() {
+    timer = setInterval(() => {
+      timeLimit--;
+      updateTimer();
+      if (timeLimit === 0) {
+        clearInterval(timer);
+        endGame();
+      }
+    }, 1000);
+  }
+  
+  function updateScore() {
+    document.getElementById('scoreValue').innerText = score;
+  }
+  
+  function updateLevel() {
+    document.getElementById('levelValue').innerText = level;
+  }
+  
+  function calculateScore() {
+    return (word.replace(/ /g, '').length * level);
+  }
+  
+  function checkLetter(letter) {
+    if (guessedLetters.includes(letter)) return;
+    guessedLetters.push(letter);
+    let newWordDisplay = '';
+    for (const char of word) {
+      if (guessedLetters.includes(char)) {
+        newWordDisplay += char + ' ';
+      } else {
+        newWordDisplay += '_ ';
+      }
+    }
+    document.getElementById('word').innerText = newWordDisplay.trim();
+    if (!newWordDisplay.includes('_')) {
+      clearInterval(timer);
+      score += calculateScore();
+      level++;
+      updateScore();
+      updateLevel();
+      setTimeout(initializeGame, 2000);
+      alert('Congratulations! You guessed the word: ' + word);
+    }
+  }
+  
+  function endGame() {
+    clearInterval(timer);
+    alert('Time is up! The word was: ' + word);
+    initializeGame();
+  }
+  
+  function generateAlphabetButtons() {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const lettersContainer = document.getElementById('letters');
+    lettersContainer.innerHTML = '';
+    for (const letter of alphabet) {
+      const button = document.createElement('button');
+      button.innerText = letter;
+      button.classList.add('letter');
+      button.addEventListener('click', function() {
+        if (!guessedLetters.includes(letter)) {
+          checkLetter(letter);
+          button.classList.add('disabled');
+        }
+      });
+      lettersContainer.appendChild(button);
+    }
+  }
+  
+  initializeGame();
+</script>
+</body>
+</html>
